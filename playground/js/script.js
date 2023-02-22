@@ -42,7 +42,8 @@ function VisualList(props) {
       itemStyle = {},
       extraProps = {},
       dataComponent,
-      itemScopedSlots
+      itemScopedSlots,
+      uniqueKey
     } = props
 
     for (let index = start; index <= end; index ++) {
@@ -50,9 +51,30 @@ function VisualList(props) {
       if (dataSource) {
         const uniquekey = typeof dataKey === 'function' ? dataKey(dataSource) : dataSource[dataKey]
         if (typeof uniquekey === 'string' || typeof uniquekey === 'number') {
-          slots.push()
+          const itemElement = `<div key="${uniqueKey}" id="rootRef">
+            <div class="item-inner">
+      <div class="head">
+        <span class="index"># ${ dataSource.index }</span>
+        <span class="name">${ dataSource.name }</span>
+      </div>
+      <div class="desc">${ dataSource.desc }</div>
+    </div>
+          </div>`;
+          slots.push(itemElement);
         }
       }
     }
+    return slots
   }
+
+  const render = () => {
+    const wrap = document.querySelector('#wrap')
+    const slots = getRenderSlots()
+    installVirtual()
+    wrap.innerHTML = slots.join('')
+  }
+
+  return {
+    render,
+  };
 }
