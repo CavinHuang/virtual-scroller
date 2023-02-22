@@ -1,6 +1,8 @@
 // https://github.com/reactjser/vue3-virtual-scroll-list/blob/main/src/virtual-list.tsx
 
 function VisualList(props) {
+
+  let range
   
   const getUniqueIdFromDataSources = () => {
     const { dataKey, dataSources = [] } = props;
@@ -27,6 +29,30 @@ function VisualList(props) {
     );
 
     // sync initial range
-    range.value = virtual.getRange();
+    range = virtual.getRange();
   };
+
+  const getRenderSlots = () => {
+    const slots = []
+    const { start, end } = range
+    const {
+      dataSources,
+      dataKey,
+      itemClass = 'item',
+      itemStyle = {},
+      extraProps = {},
+      dataComponent,
+      itemScopedSlots
+    } = props
+
+    for (let index = start; index <= end; index ++) {
+      const dataSource = dataSources[index]
+      if (dataSource) {
+        const uniquekey = typeof dataKey === 'function' ? dataKey(dataSource) : dataSource[dataKey]
+        if (typeof uniquekey === 'string' || typeof uniquekey === 'number') {
+          slots.push()
+        }
+      }
+    }
+  }
 }

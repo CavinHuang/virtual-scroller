@@ -5,12 +5,101 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .list-infinite {
+        margin-top: 50px;
+        width: 100%;
+        height: 500px;
+        border: 2px solid;
+        border-radius: 3px;
+        overflow-y: auto;
+        border-color: dimgray;
+        position: relative;
+      }
+      .list-infinite .list-item-infinite {
+        display: flex;
+        align-items: center;
+        padding: 1em;
+        border-bottom: 1px solid;
+        border-color: lightgray;
+      }
+      .list-infinite .loader-wrapper {
+        padding: 1em;
+      }
+      .list-infinite .loader {
+        font-size: 10px;
+        margin: 0px auto;
+        text-indent: -9999em;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #ffffff;
+        background: linear-gradient(
+          to right,
+          #9b4dca 10%,
+          rgba(255, 255, 255, 0) 42%
+        );
+        position: relative;
+        animation: load3 1.4s infinite linear;
+        transform: translateZ(0);
+      }
+      .list-infinite .loader:before {
+        width: 50%;
+        height: 50%;
+        background: #9b4dca;
+        border-radius: 100% 0 0 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        content: "";
+      }
+      .loader:after {
+        background: #ffffff;
+        width: 75%;
+        height: 75%;
+        border-radius: 50%;
+        content: "";
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+      @-webkit-keyframes load3 {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes load3 {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="list-container"></div>
+    <div id="list-container">
+      <div class="visual-list list-infinite scroll-touch">
+        <div onscroll="onScroll">
+          <!-- 头部 -->
+          <div class="wrapp"></div>
+          <!-- 底部加载 -->
+          <div class="loader"></div>
+        </div>
+      </div>
+    </div>
     <script src="../../libs/index.global.js"></script>
-    <script>
-      
-    </script>
+    <script src="./script.js"></script>
   </body>
 </html>
