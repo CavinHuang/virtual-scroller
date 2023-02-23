@@ -1,5 +1,3 @@
-// https://github.com/reactjser/vue3-virtual-scroll-list/blob/main/src/virtual-list.tsx
-
 function VisualList(props) {
   console.log("start", props);
   props = Object.assign(

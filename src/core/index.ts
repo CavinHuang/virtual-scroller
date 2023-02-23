@@ -37,6 +37,9 @@ interface RangeItem {
 
 export default class Virtual {
   callUpdate!: CallUpdate | null;
+  /**
+   * 默认
+   */
   param: IParmas | null = {
     keeps: 30,
     extraProps: {},
@@ -86,7 +89,10 @@ export default class Virtual {
     this.init(null, null);
   }
 
-  // return current render range
+  /**
+   * 当前的节点
+   * @returns 
+   */
   getRange(): RangeItem {
     const range = Object.create(null);
     if (this.range) {
@@ -106,7 +112,11 @@ export default class Virtual {
     return this.direction === DIRECTION_TYPE.FRONT;
   }
 
-  // return start index offset
+  /**
+   * 根据start获取结束
+   * @param start 
+   * @returns 
+   */
   getOffset(start: number) {
     return (
       (start < 1 ? 0 : this.getIndexOffset(start)) + this.param!.slotHeaderSize
@@ -132,7 +142,11 @@ export default class Virtual {
     }
   }
 
-  // save each size map by id
+  /**
+   * 保存各项的size
+   * @param id 
+   * @param size 
+   */
   saveSize(id: number, size: number) {
     this.sizes.set(id, size);
 
@@ -174,8 +188,9 @@ export default class Virtual {
     }
   }
 
-  // in some special situation (e.g. length change) we need to update in a row
-  // try goiong to render next range by a leading buffer according to current direction
+  /**
+   * 数据变化，需要更新指针
+   */
   handleDataSourcesChange() {
     let start = this.range!.start;
 
@@ -190,12 +205,18 @@ export default class Virtual {
     this.updateRange(this.range!.start, this.getEndByStart(start));
   }
 
-  // when slot size change, we also need force update
+  /**
+   * 单项大小变动
+   */
   handleSlotSizeChange() {
     this.handleDataSourcesChange();
   }
 
-  // calculating range on scroll
+  /**
+   * 滚动时计算指针
+   * @param offset 
+   * @returns 
+   */
   handleScroll(offset: number) {
     this.direction =
       offset < this.offset ? DIRECTION_TYPE.FRONT : DIRECTION_TYPE.BEHIND;
@@ -238,7 +259,7 @@ export default class Virtual {
     this.checkRange(overs, this.getEndByStart(overs));
   }
 
-  // return the pass overs according to current scroll offset
+  // 根据当前滚动偏移返回传递
   getScrollOvers() {
     // if slot header exist, we need subtract its size
     const offset = this.offset - this.param!.slotHeaderSize;
@@ -273,8 +294,8 @@ export default class Virtual {
     return low > 0 ? --low : 0;
   }
 
-  // return a scroll offset from given index, can efficiency be improved more here?
-  // although the call frequency is very high, its only a superposition of numbers
+  // 返回给定索引的滚动偏移量，是否可以在这里进一步提高效率？
+  // 根据索引获取长度
   getIndexOffset(givenIndex: number) {
     if (!givenIndex) {
       return 0;
@@ -297,18 +318,17 @@ export default class Virtual {
     return offset;
   }
 
-  // is fixed size type
+  // 是不是fixed模式
   isFixedType() {
     return this.calcType === CALC_TYPE.FIXED;
   }
 
-  // return the real last index
+  // 获取真正的最后一个索引
   getLastIndex() {
     return this.uniqueIds.length - 1;
   }
 
-  // in some conditions range is broke, we need correct it
-  // and then decide whether need update to next range
+  // 检测指针是否正确
   checkRange(start: number, end: number) {
     const keeps = this.param!.keeps;
     const total = this.uniqueIds.length;
@@ -332,7 +352,7 @@ export default class Virtual {
     }
   }
 
-  // setting to a new range and rerender
+  // 更新指针
   updateRange(start: number, end: number) {
     if (this.range) {
       this.range.start = start;
@@ -343,14 +363,14 @@ export default class Virtual {
     }
   }
 
-  // return end base on start
+  // 根据start获取end
   getEndByStart(start: number) {
     const theoryEnd = start + this.param!.keeps - 1;
     const truelyEnd = Math.min(theoryEnd, this.getLastIndex());
     return truelyEnd;
   }
 
-  // return total front offset
+  // 获取往前的距离
   getPadFront() {
     if (this.isFixedType()) {
       return this.fixedSizeValue! * this.range!.start;
@@ -359,7 +379,7 @@ export default class Virtual {
     }
   }
 
-  // return total behind offset
+  // 获取往后的偏移距离
   getPadBehind() {
     const end = this.range!.end;
     const lastIndex = this.getLastIndex();
@@ -378,7 +398,7 @@ export default class Virtual {
     }
   }
 
-  // get the item estimate size
+  // 获取预计的大小
   getEstimateSize() {
     return this.isFixedType()
       ? this.fixedSizeValue
