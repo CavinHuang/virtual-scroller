@@ -45,6 +45,7 @@ export default class Virtual {
     uniqueIds: [],
     buffer: 5
   };
+  uniqueIds: Array<string | number> = []
   
   // size data
   sizes: Map<any,any> = new Map();
@@ -70,10 +71,15 @@ export default class Virtual {
     // param data
     this.param = Object.assign({}, this.param, param);
     this.callUpdate = callUpdate;
+    this.uniqueIds = this.param.uniqueIds
 
     if (param) {
       this.checkRange(0, param.keeps - 1);
     }
+  }
+
+  setUniqueIds(uniqueIds: Array<string | number> = []) {
+    this.uniqueIds = uniqueIds
   }
 
   destroy() {
@@ -118,6 +124,7 @@ export default class Virtual {
             this.sizes.delete(key);
           }
         });
+        this.uniqueIds = value
       }
       // TODO
       // @ts-ignore
@@ -151,7 +158,7 @@ export default class Virtual {
     ) {
       if (
         this.sizes.size <
-        Math.min(this.param!.keeps, this.param!.uniqueIds.length)
+        Math.min(this.param!.keeps, this!.uniqueIds.length)
       ) {
         this.firstRangeTotalSize = [...this.sizes.values()].reduce(
           (acc, val) => acc + val,
@@ -197,6 +204,7 @@ export default class Virtual {
     if (!this.param) {
       return;
     }
+    console.log(this.direction)
 
     if (this.direction === DIRECTION_TYPE.FRONT) {
       this.handleFront();
@@ -221,6 +229,7 @@ export default class Virtual {
 
   handleBehind() {
     const overs = this.getScrollOvers();
+    // console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
     // range should not change if scroll overs within buffer
     if (overs < this.range!.start + this.param!.buffer) {
       return;
@@ -245,7 +254,7 @@ export default class Virtual {
     let low = 0;
     let middle = 0;
     let middleOffset = 0;
-    let high = this.param!.uniqueIds.length;
+    let high = this!.uniqueIds.length;
 
     while (low <= high) {
       // this.__bsearchCalls++
@@ -275,7 +284,7 @@ export default class Virtual {
     let indexSize = 0;
     for (let index = 0; index < givenIndex; index++) {
       // this.__getIndexOffsetCalls++
-      indexSize = this.sizes.get(this.param!.uniqueIds[index]);
+      indexSize = this.sizes.get(this!.uniqueIds[index]);
       offset =
         offset +
         (typeof indexSize === 'number' ? indexSize : this.getEstimateSize()!);
@@ -295,16 +304,16 @@ export default class Virtual {
 
   // return the real last index
   getLastIndex() {
-    return this.param!.uniqueIds.length - 1;
+    return this.uniqueIds.length - 1;
   }
 
   // in some conditions range is broke, we need correct it
   // and then decide whether need update to next range
   checkRange(start: number, end: number) {
     const keeps = this.param!.keeps;
-    const total = this.param!.uniqueIds.length;
+    const total = this.uniqueIds.length;
 
-    console.log(this.param, keeps, total)
+    console.log(this.param, keeps, total, end - start < keeps - 1)
 
     // datas less than keeps, render all
     if (total <= keeps) {
@@ -315,7 +324,10 @@ export default class Virtual {
       start = end - keeps + 1;
     }
 
+    console.log(this.range, start)
+
     if (this.range!.start !== start) {
+      console.log('==+++++++++++++=================')
       this.updateRange(start, end);
     }
   }
@@ -351,7 +363,8 @@ export default class Virtual {
   getPadBehind() {
     const end = this.range!.end;
     const lastIndex = this.getLastIndex();
-
+    console.log('getPadBehind',  end, lastIndex, this.lastCalcIndex === lastIndex, this.getEstimateSize());
+    
     if (this.isFixedType()) {
       return (lastIndex - end) * this.fixedSizeValue!;
     }

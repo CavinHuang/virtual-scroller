@@ -1,28 +1,43 @@
 // https://github.com/reactjser/vue3-virtual-scroll-list/blob/main/src/virtual-list.tsx
 
 function VisualList(props) {
-  console.log('start', props)
-  let range
-  
+  console.log("start", props);
+  let range;
+  let virtual;
+  const isHorizontal = props.direction === "horizontal";
+  const directionKey = isHorizontal ? "scrollLeft" : "scrollTop";
+  const root = document.querySelector(".visual-list");
+  const wrap = document.querySelector("#wrap");
+
+  props = Object.assign(
+    {},
+    {
+      bottomThreshold: 0
+    },
+    props
+  );
+  let dataSources = props.dataSources
   const getUniqueIdFromDataSources = () => {
-    const { dataKey, dataSources = [] } = props;
+    const { dataKey } = props;
     return dataSources.map((dataSource) =>
       typeof dataKey === "function" ? dataKey(dataSource) : dataSource[dataKey]
     );
   };
 
   const onRangeChanged = (newRange) => {
+    console.log('range changed', newRange)
     range = newRange;
   };
 
   const installVirtual = () => {
+    const keeps = 30
     virtual = new Virtual.Virtual(
       {
         slotHeaderSize: 0,
         slotFooterSize: 0,
-        keeps: props.keeps || 30,
+        keeps,
         estimateSize: props.estimateSize,
-        buffer: Math.round(props.keeps / 3), // recommend for a third of keeps
+        buffer: Math.round(keeps / 3), // recommend for a third of keeps
         uniqueIds: getUniqueIdFromDataSources(),
       },
       onRangeChanged
@@ -30,30 +45,34 @@ function VisualList(props) {
 
     // sync initial range
     range = virtual.getRange();
+
+    root.addEventListener("scroll", onScroll, false);
   };
 
   const getRenderSlots = () => {
-    const slots = []
-    const { start, end } = range
+    const slots = [];
+    const { start, end } = range;
     const {
-      dataSources,
       dataKey,
-      itemClass = 'item',
+      itemClass = "item",
       itemStyle = {},
       extraProps = {},
       dataComponent,
       itemScopedSlots,
-      uniqueKey
-    } = props
+      uniqueKey,
+    } = props;
 
     console.log("start", dataKey, start, end, dataSources);
 
-    for (let index = start; index <= end; index ++) {
-      const dataSource = dataSources[index]
+    for (let index = start; index <= end; index++) {
+      const dataSource = dataSources[index];
       if (dataSource) {
-        const uniquekey = typeof dataKey === 'function' ? dataKey(dataSource) : dataSource[dataKey]
-        if (typeof uniquekey === 'string' || typeof uniquekey === 'number') {
-          const itemElement = `<div data-key="${uniquekey}" class="${itemClass}" id="rootRef_${uniquekey}">
+        const uniquekey =
+          typeof dataKey === "function"
+            ? dataKey(dataSource)
+            : dataSource[dataKey];
+        if (typeof uniquekey === "string" || typeof uniquekey === "number") {
+          const itemElement = `<div data-key="${uniquekey}" data-index="${index}" class="${itemClass}" id="rootRef_${uniquekey}">
             <div class="item-inner">
       <div class="head">
         <span class="index"># ${dataSource.index}</span>
@@ -66,17 +85,99 @@ function VisualList(props) {
         }
       }
     }
-    return slots
-  }
+    return slots;
+  };
+
+  const emitEvent = (offset, clientSize, scrollSize, evt) => {
+    props.onScroll && props.onScroll(evt, virtual.getRange());
+
+    if (
+      virtual.isFront() &&
+      !!dataSources.length &&
+      offset - props.topThreshold <= 0
+    ) {
+      props.toTop && props.toTop();
+    } else if (
+      virtual.isBehind() &&
+      offset + clientSize + props.bottomThreshold >= scrollSize
+    ) {
+      props.toBottom && props.toBottom(virtual);
+    }
+  };
+
+  const getOffset = () => {
+    if (props.pageMode) {
+      return (
+        document.documentElement[directionKey] || document.body[directionKey]
+      );
+    } else {
+      return root ? Math.ceil(root[directionKey]) : 0;
+    }
+  };
+  // return client viewport size
+  const getClientSize = () => {
+    const key = isHorizontal ? "clientWidth" : "clientHeight";
+    if (props.pageMode) {
+      return document.documentElement[key] || document.body[key];
+    } else {
+      return root ? Math.ceil(root[key]) : 0;
+    }
+  };
+  // return all scroll size
+  const getScrollSize = () => {
+    const key = isHorizontal ? "scrollWidth" : "scrollHeight";
+    if (props.pageMode) {
+      return document.documentElement[key] || document.body[key];
+    } else {
+      return root ? Math.ceil(root[key]) : 0;
+    }
+  };
+
+  const onScroll = (evt) => {
+    const offset = getOffset();
+    const clientSize = getClientSize();
+    const scrollSize = getScrollSize();
+
+    // iOS scroll-spring-back behavior will make direction mistake
+    if (offset < 0 || offset + clientSize > scrollSize + 1 || !scrollSize) {
+      return;
+    }
+
+    virtual.handleScroll(offset);
+    emitEvent(offset, clientSize, scrollSize, evt);
+  };
 
   const render = () => {
-    const wrap = document.querySelector('#wrap')
-    installVirtual();
-    const slots = getRenderSlots()
-    wrap.innerHTML = slots.join('')
+    const slots = getRenderSlots();
+    const { padFront, padBehind } = range;
+    const paddingStyle = {
+      padding: isHorizontal
+        ? `0px ${padBehind}px 0px ${padFront}px`
+        : `${padFront}px 0px ${padBehind}px`,
+    };
+    const { wrapStyle = {} } = props;
+    const wrapperStyle = wrapStyle
+      ? Object.assign({}, wrapStyle, paddingStyle)
+      : paddingStyle;
+
+    for (const key in wrapperStyle) {
+      if (Object.hasOwnProperty.call(wrapperStyle, key)) {
+        wrap.style[key] = wrapperStyle[key]
+      }
+    }
+    wrap.innerHTML = slots.join("");
+  };
+
+  const setDataSources = (items) => {
+    dataSources = items
+    // virtual.setUniqueIds(getUniqueIdFromDataSources());
+    virtual.updateParam("uniqueIds", getUniqueIdFromDataSources());
+    virtual.handleDataSourcesChange();
   }
 
   return {
+    installVirtual,
     render,
+    setDataSources,
   };
 }

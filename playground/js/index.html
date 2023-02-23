@@ -106,7 +106,7 @@
   <body>
     <div id="list-container">
       <div class="visual-list list-infinite scroll-touch">
-        <div onscroll="onScroll">
+        <div id="scrollWrap">
           <!-- 头部 -->
           <div class="wrapp" id="wrap"></div>
           <!-- 底部加载 -->
@@ -283,20 +283,45 @@
         return DataItems;
       };
 
+      let loading = false
+      const loader = document.querySelector('.loader')
       const onScrollToTop = () => {};
-      const onScrollToBottom = () => {};
+      const onScrollToBottom = (virtual) => {
+        console.log('bottom========================', virtual)
+        if (loading) return
+        setLoading(false)
+        setTimeout(() => {
+          setLoading(true)
+          items = items.concat(getPageData(pageSize, items.length))
+          visualList.setDataSources(items)
+          setTimeout(() => {
+            visualList.render()
+          })
+        }, 500)
+      };
+
+      const setLoading = (state) => {
+        if (state) {
+          loading = false
+          loader.style.display = 'none'
+        } else {
+          loading = true
+          loader.style.display = 'block'
+        }
+      }
 
       const pageSize = 20;
-      const items = getPageData(pageSize, 0);
+      let items = getPageData(pageSize, 0);
       const visualList = VisualList({
         dataKey: "id",
         dataSources: items,
-        estimateSize: 70,
+        estimateSize: 50,
         itemClass: "list-item-infinite",
         footerClass: "loader-wrapper",
         toTop: onScrollToTop,
-        toBootom: onScrollToBottom,
+        toBottom: onScrollToBottom,
       });
+      visualList.installVirtual();
       visualList.render();
     </script>
   </body>
