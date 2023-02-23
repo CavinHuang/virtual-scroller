@@ -2,21 +2,24 @@
 
 function VisualList(props) {
   console.log("start", props);
+  props = Object.assign(
+    {},
+    {
+      bottomThreshold: 0,
+      direction: "vertical",
+    },
+    props
+  );
+
   let range;
   let virtual;
   const isHorizontal = props.direction === "horizontal";
   const directionKey = isHorizontal ? "scrollLeft" : "scrollTop";
   const root = document.querySelector(".visual-list");
   const wrap = document.querySelector("#wrap");
+  const shepherd = document.querySelector("#shepherd");
 
-  props = Object.assign(
-    {},
-    {
-      bottomThreshold: 0
-    },
-    props
-  );
-  let dataSources = props.dataSources
+  let dataSources = props.dataSources;
   const getUniqueIdFromDataSources = () => {
     const { dataKey } = props;
     return dataSources.map((dataSource) =>
@@ -25,12 +28,52 @@ function VisualList(props) {
   };
 
   const onRangeChanged = (newRange) => {
-    console.log('range changed', newRange)
+    console.log("range changed", newRange);
     range = newRange;
   };
 
+  // set current scroll position to a expectant index
+  const scrollToIndex = (index) => {
+    // scroll to bottom
+    if (index >= dataSources.length - 1) {
+      scrollToBottom();
+    } else {
+      const offset = virtual.getOffset(index);
+      scrollToOffset(offset);
+    }
+  };
+
+  // set current scroll position to bottom
+  const scrollToBottom = () => {
+    if (shepherd) {
+      const offset = shepherd[isHorizontal ? "offsetLeft" : "offsetTop"];
+      scrollToOffset(offset);
+
+      // check if it's really scrolled to the bottom
+      // maybe list doesn't render and calculate to last range
+      // so we need retry in next event loop until it really at bottom
+      setTimeout(() => {
+        if (getOffset() + getClientSize() < getScrollSize()) {
+          scrollToBottom();
+        }
+      }, 3);
+    }
+  };
+
+  // set current scroll position to a expectant offset
+  const scrollToOffset = (offset) => {
+    if (props.pageMode) {
+      document.body[directionKey] = offset;
+      document.documentElement[directionKey] = offset;
+    } else {
+      if (root) {
+        root[directionKey] = offset;
+      }
+    }
+  };
+
   const installVirtual = () => {
-    const keeps = 30
+    const keeps = 30;
     virtual = new Virtual.Virtual(
       {
         slotHeaderSize: 0,
@@ -47,6 +90,7 @@ function VisualList(props) {
     range = virtual.getRange();
 
     root.addEventListener("scroll", onScroll, false);
+    setShepherdStyle()
   };
 
   const getRenderSlots = () => {
@@ -62,7 +106,7 @@ function VisualList(props) {
       uniqueKey,
     } = props;
 
-    console.log("start", dataKey, start, end, dataSources);
+    // console.log("start", dataKey, start, end, dataSources);
 
     for (let index = start; index <= end; index++) {
       const dataSource = dataSources[index];
@@ -145,10 +189,10 @@ function VisualList(props) {
 
     virtual.handleScroll(offset);
     emitEvent(offset, clientSize, scrollSize, evt);
+    updateWrapStyle();
   };
 
-  const render = () => {
-    const slots = getRenderSlots();
+  const updateWrapStyle = () => {
     const { padFront, padBehind } = range;
     const paddingStyle = {
       padding: isHorizontal
@@ -162,22 +206,34 @@ function VisualList(props) {
 
     for (const key in wrapperStyle) {
       if (Object.hasOwnProperty.call(wrapperStyle, key)) {
-        wrap.style[key] = wrapperStyle[key]
+        wrap.style[key] = wrapperStyle[key];
       }
     }
+  };
+
+  const setShepherdStyle = () => {
+    shepherd.style.width = isHorizontal ? '0px' : '100%'
+    shepherd.style.height = isHorizontal ? '100%' : '0px'
+  }
+
+  const render = () => {
+    const slots = getRenderSlots();
+    updateWrapStyle();
     wrap.innerHTML = slots.join("");
   };
 
   const setDataSources = (items) => {
-    dataSources = items
+    dataSources = items;
     // virtual.setUniqueIds(getUniqueIdFromDataSources());
     virtual.updateParam("uniqueIds", getUniqueIdFromDataSources());
     virtual.handleDataSourcesChange();
-  }
+  };
 
   return {
     installVirtual,
     render,
     setDataSources,
+    scrollToIndex,
+    scrollToOffset
   };
 }

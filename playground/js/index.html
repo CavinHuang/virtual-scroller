@@ -105,14 +105,17 @@
   </head>
   <body>
     <div id="list-container">
+      <div class="total" id="total"></div>
       <div class="visual-list list-infinite scroll-touch">
         <div id="scrollWrap">
           <!-- 头部 -->
           <div class="wrapp" id="wrap"></div>
           <!-- 底部加载 -->
           <div class="loader"></div>
+          <div id="shepherd"></div>
         </div>
       </div>
+      <button onclick="jump()">跳转第三条</button>
     </div>
     <script src="../../libs/index.global.js"></script>
     <script src="./script.js"></script>
@@ -264,7 +267,7 @@
 
         let counts = random(min, isMobile ? 3 : max);
         while (counts--) {
-          results.push(random(1, sentences.length));
+          results.push(sentences[random(1, sentences.length)]);
         }
         return results.join(". ") + ".";
       }
@@ -285,14 +288,18 @@
 
       let loading = false
       const loader = document.querySelector('.loader')
+      const total = document.querySelector('#total')
+      const setTotal = () => {
+        total.innerHTML = `总数: ${items.length}条`
+      }
       const onScrollToTop = () => {};
       const onScrollToBottom = (virtual) => {
-        console.log('bottom========================', virtual)
         if (loading) return
         setLoading(false)
         setTimeout(() => {
           setLoading(true)
           items = items.concat(getPageData(pageSize, items.length))
+          setTotal()
           visualList.setDataSources(items)
           setTimeout(() => {
             visualList.render()
@@ -323,6 +330,12 @@
       });
       visualList.installVirtual();
       visualList.render();
+      setTotal()
+
+      function jump() {
+        visualList.scrollToIndex(3)
+        visualList.render()
+      }
     </script>
   </body>
 </html>
