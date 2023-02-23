@@ -18,13 +18,12 @@ const LEADING_BUFFER = 2;
 interface IParmas {
   // 虚拟列表在真实 dom 中继续呈现多少项
   keeps: number
-  'extra-props': Record<string, any>,
+  extraProps: Record<string, any>,
   // 每个项目的估计大小，如果它更接近平均大小，滚动条长度看起来更准确。建议分配自己计算的平均值。
-  'estimate-size': number
-  slotHeaderSize: number
-  uniqueIds: string
-  buffer: number
   estimateSize: number
+  slotHeaderSize: number
+  uniqueIds: Array<string | number>
+  buffer: number
 }
 
 type CallUpdate = (rang: RangeItem) => void
@@ -38,7 +37,14 @@ interface RangeItem {
 
 export default class Virtual {
   callUpdate!: CallUpdate | null;
-  param!: IParmas | null;
+  param: IParmas | null = {
+    keeps: 30,
+    extraProps: {},
+    estimateSize: 50,
+    slotHeaderSize: 10,
+    uniqueIds: [],
+    buffer: 5
+  };
   
   // size data
   sizes: Map<any,any> = new Map();
@@ -56,12 +62,13 @@ export default class Virtual {
   range: RangeItem | null = Object.create(null);
 
   constructor(param: IParmas | null, callUpdate: CallUpdate | null) {
+    console.log('init', param)
     this.init(param, callUpdate);
   }
 
   init(param: IParmas | null, callUpdate: CallUpdate | null) {
     // param data
-    this.param = param;
+    this.param = Object.assign({}, this.param, param);
     this.callUpdate = callUpdate;
 
     if (param) {
@@ -296,6 +303,8 @@ export default class Virtual {
   checkRange(start: number, end: number) {
     const keeps = this.param!.keeps;
     const total = this.param!.uniqueIds.length;
+
+    console.log(this.param, keeps, total)
 
     // datas less than keeps, render all
     if (total <= keeps) {

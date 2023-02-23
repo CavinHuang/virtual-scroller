@@ -87,6 +87,21 @@
         }
       }
     </style>
+    <style>
+      .item-inner .head {
+        font-weight: 500;
+      }
+      .item-inner .index {
+        margin-right: 1em;
+      }
+      .item-inner .name {
+        margin-left: 1em;
+      }
+      .item-inner .desc {
+        padding-top: 0.5em;
+        text-align: justify;
+      }
+    </style>
   </head>
   <body>
     <div id="list-container">
@@ -274,7 +289,7 @@
       const pageSize = 20;
       const items = getPageData(pageSize, 0);
       const visualList = VisualList({
-        datakey: "id",
+        dataKey: "id",
         dataSources: items,
         estimateSize: 70,
         itemClass: "list-item-infinite",
