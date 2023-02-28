@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['index.ts'],
-  format: ['esm', 'iife'],
+  format: ['esm', 'cjs', 'iife'],
   globalName: 'Virtual',
   splitting: false,
   sourcemap: true,
