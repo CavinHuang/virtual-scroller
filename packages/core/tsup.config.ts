@@ -1,8 +1,8 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm', 'cjs', 'iife'],
+  entry: ['index.ts'],
+  format: ['esm', 'iife'],
   globalName: 'Virtual',
   splitting: false,
   sourcemap: true,
