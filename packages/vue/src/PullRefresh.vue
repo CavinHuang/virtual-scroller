@@ -47,16 +47,16 @@ const locale = {
 
 const props = withDefaults(
   defineProps<{
-    disabled: boolean;
-    modelValue: boolean;
-    headHeight: string | number;
-    successText: string;
-    pullingText: string;
-    loosingText: string;
-    loadingText: string;
-    pullDistance: string | number;
-    successDuration: number | string;
-    animationDuration: number | string;
+    disabled?: boolean;
+    modelValue?: boolean;
+    headHeight?: string | number;
+    successText?: string;
+    pullingText?: string;
+    loosingText?: string;
+    loadingText?: string;
+    pullDistance?: string | number;
+    successDuration?: number | string;
+    animationDuration?: number | string;
   }>(),
   {
     headHeight: DEFAULT_HEAD_HEIGHT,
