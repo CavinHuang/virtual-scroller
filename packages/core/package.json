@@ -1,0 +1,19 @@
+{
+  "name": "@visual-scroller/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./libs/index.js",
+  "module": "./libs/index.js",
+  "types": "./libs/index.d.ts",
+  "exports": {
+    "default": "./libs/index.mjs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
