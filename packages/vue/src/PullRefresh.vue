@@ -14,7 +14,7 @@
             <div class="loading" v-if="state.status === 'loading'"></div>
           </slot>
       </div>
-      {slots.default?.()}
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -59,7 +59,7 @@ const props = withDefaults(
     animationDuration?: number | string;
   }>(),
   {
-    headHeight: DEFAULT_HEAD_HEIGHT,
+    headHeight: 50,
     successDuration: 500,
     animationDuration: 300,
   }
@@ -225,4 +225,40 @@ useEventListener("touchmove", onTouchMove, {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+:root {
+  --van-pull-refresh-head-height: 50px;
+  --van-pull-refresh-head-font-size: 14;
+  --van-pull-refresh-head-text-color: #969799;
+  --van-pull-refresh-loading-icon-size: 16px;
+}
+.pull-refresh {
+  overflow: hidden;
+
+  &__track {
+    position: relative;
+    height: 100%;
+    transition-property: transform;
+  }
+
+  &__head {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: var(--van-pull-refresh-head-height);
+    overflow: hidden;
+    color: var(--van-pull-refresh-head-text-color);
+    font-size: var(--van-pull-refresh-head-font-size);
+    line-height: var(--van-pull-refresh-head-height);
+    text-align: center;
+    transform: translateY(-100%);
+  }
+
+  &__loading {
+    .van-loading__spinner {
+      width: var(--van-pull-refresh-loading-icon-size);
+      height: var(--van-pull-refresh-loading-icon-size);
+    }
+  }
+}
+</style>
