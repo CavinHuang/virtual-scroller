@@ -5,6 +5,9 @@ function VisualList(props) {
     {
       bottomThreshold: 0,
       direction: "vertical",
+      root: ".visual-list",
+      wrap: "#wrap",
+      shepherd: "#shepherd"
     },
     props
   );
@@ -13,9 +16,9 @@ function VisualList(props) {
   let virtual;
   const isHorizontal = props.direction === "horizontal";
   const directionKey = isHorizontal ? "scrollLeft" : "scrollTop";
-  const root = document.querySelector(".visual-list");
-  const wrap = document.querySelector("#wrap");
-  const shepherd = document.querySelector("#shepherd");
+  const root = document.querySelector(props.root);
+  const wrap = document.querySelector(props.wrap);
+  const shepherd = document.querySelector(props.shepherd);
 
   let dataSources = props.dataSources;
   const getUniqueIdFromDataSources = () => {
