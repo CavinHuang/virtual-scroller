@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@visual-scroller/vue": "workspace:*",
+    "@virsual-scroller/vue": "workspace:*",
     "vue": "^3.2.45"
   },
   "devDependencies": {

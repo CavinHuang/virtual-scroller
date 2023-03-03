@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-// import HelloWorld from './components/HelloWorld.vue'
-import { PullRefresh } from '@visual-scroller/vue/src/index'
+import HelloWorld from './components/HelloWorld.vue'
+import { PullRefresh } from '@virsual-scroller/vue'
 
 const count = ref(0);
 const loading = ref(false);
@@ -22,8 +22,8 @@ const onRefresh = () => {
     <a href="https://vuejs.org/" target="_blank">
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" /> -->
+  </div> -->
+  <HelloWorld msg="Vite + Vue" />
   <PullRefresh v-model="loading" @refresh="onRefresh">
     <p>刷新次数: {{ count }}</p>
   </PullRefresh>

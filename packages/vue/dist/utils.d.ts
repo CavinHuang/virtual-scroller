@@ -1,0 +1,23 @@
+import { Ref } from 'vue';
+type ScrollElement = Element | Window;
+export declare function getScrollParent(el: Element, root?: ScrollElement | undefined): ScrollElement | undefined;
+export declare function useScrollParent(el: Ref<Element | undefined>, root?: ScrollElement | undefined): Ref<Window | Element | undefined>;
+type Direction = '' | 'vertical' | 'horizontal';
+export declare function useTouch(): {
+    move: EventListener;
+    start: EventListener;
+    reset: () => void;
+    startX: Ref<number>;
+    startY: Ref<number>;
+    deltaX: Ref<number>;
+    deltaY: Ref<number>;
+    offsetX: Ref<number>;
+    offsetY: Ref<number>;
+    direction: Ref<Direction>;
+    isVertical: () => boolean;
+    isHorizontal: () => boolean;
+};
+export declare function getScrollTop(el: ScrollElement): number;
+export declare const stopPropagation: (event: Event) => void;
+export declare function preventDefault(event: Event, isStopPropagation?: boolean): void;
+export {};
