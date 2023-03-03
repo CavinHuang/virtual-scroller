@@ -1,9 +1,21 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import { PullRefresh } from '@visual-scroller/vue/src/index'
+
+const count = ref(0);
+const loading = ref(false);
+const onRefresh = () => {
+  setTimeout(() => {
+    loading.value = false;
+    count.value++;
+  }, 1000);
+};
+
 </script>
 
 <template>
-  <div>
+  <!-- <div>
     <a href="https://vitejs.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />
     </a>
@@ -11,7 +23,10 @@ import HelloWorld from './components/HelloWorld.vue'
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <HelloWorld msg="Vite + Vue" /> -->
+  <PullRefresh v-model="loading" @refresh="onRefresh">
+    <p>刷新次数: {{ count }}</p>
+  </PullRefresh>
 </template>
 
 <style scoped>
