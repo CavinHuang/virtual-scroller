@@ -25,7 +25,7 @@ import {
   getScrollTop,
   preventDefault,
   useScrollParent,
-  useTouch,
+  useTouch
 } from "./utils";
 import { useEventListener } from "./useEventListener";
 
