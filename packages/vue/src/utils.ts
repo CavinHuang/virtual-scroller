@@ -1,4 +1,4 @@
-import { ref, Ref, onMounted } from 'vue';
+import { ref, Ref, onMounted, computed, onUpdated, onUnmounted } from 'vue';
 
 type ScrollElement = Element | Window;
 
@@ -137,3 +137,44 @@ export function preventDefault(event: Event, isStopPropagation?: boolean) {
     stopPropagation(event);
   }
 }
+
+export const useResizeChange = (
+  props: any,
+  rootRef: Ref<HTMLElement | null>,
+  emit: any,
+) => {
+  let resizeObserver: ResizeObserver | null = null;
+  const shapeKey = computed(() =>
+    props.horizontal ? 'offsetWidth' : 'offsetHeight',
+  );
+
+  const getCurrentSize = () => {
+    return rootRef.value ? rootRef.value[shapeKey.value] : 0;
+  };
+
+  // tell parent current size identify by unqiue key
+  const dispatchSizeChange = () => {
+    const { event, uniqueKey, hasInitial } = props;
+    emit(event, uniqueKey, getCurrentSize(), hasInitial);
+  };
+
+  onMounted(() => {
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        dispatchSizeChange();
+      });
+      rootRef.value && resizeObserver.observe(rootRef.value);
+    }
+  });
+
+  onUpdated(() => {
+    dispatchSizeChange();
+  });
+
+  onUnmounted(() => {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
+  });
+};
