@@ -20,4 +20,5 @@ export declare function useTouch(): {
 export declare function getScrollTop(el: ScrollElement): number;
 export declare const stopPropagation: (event: Event) => void;
 export declare function preventDefault(event: Event, isStopPropagation?: boolean): void;
+export declare const useResizeChange: (props: any, rootRef: Ref<HTMLElement | null>, emit: any) => void;
 export {};

@@ -1,13 +1,23 @@
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import path from 'path'
+import fs from 'fs'
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
     vue(),
     dts({
-      outputDir: 'dist'
+      outputDir: 'dist',
+      afterBuild: () => {
+        const srcPath = path.resolve(__dirname, './dist/src')
+        fs.readdirSync(srcPath).forEach(file => {
+          const fullFile = path.join(srcPath, file)
+          fs.copyFileSync(fullFile, path.join(__dirname, 'dist', file))
+          fs.unlinkSync(fullFile)
+        })
+        fs.rmdirSync(srcPath)
+      }
     })
   ],
   build: {
