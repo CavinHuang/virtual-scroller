@@ -17,7 +17,9 @@
           :unique-key="dataSource.uniqueKey"
           :source="dataSource.dataSource"
           :extra-props="extraProps"
-        ></virtualListItem>
+        >
+        <slot v-bind="{ source: dataSource }"></slot>
+      </virtualListItem>
       </template>
     </div>
     <slot name="footer">

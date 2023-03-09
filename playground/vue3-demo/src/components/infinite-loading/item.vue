@@ -17,7 +17,7 @@ defineProps({
   </div>
 </template>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .item-inner {
   .head {
     font-weight: 500;

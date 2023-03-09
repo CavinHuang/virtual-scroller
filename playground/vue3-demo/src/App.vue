@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 // import HelloWorld from './components/HelloWorld.vue'
 import List from './components/list.vue'
+import ScrollList from './components/infinite-loading/index.vue'
 const count = ref(0);
 const loading = ref(false);
 const onRefresh = () => {
@@ -14,7 +15,8 @@ const onRefresh = () => {
 </script>
 
 <template>
-  <List />
+  <ScrollList />
+  <!-- <List /> -->
   <!-- <div>
     <a href="https://vitejs.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />

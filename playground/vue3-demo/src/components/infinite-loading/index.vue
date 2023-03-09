@@ -50,15 +50,8 @@ const onScrollToBottom = () => {
 
 <template>
   <div class="example">
-    <GithubCorner />
-    <Introduction
-      description="Use <code>@tobottom</code> to listen scroll reach bottom, add a footer slot as loading, then append next parts data into <code>data-sources</code> array."
-    />
-
     <div class="example-content">
-
       <div class="result">Items count: {{ items.length }}.</div>
-
       <VirsualList
         class="list-infinite scroll-touch"
         :data-key="'id'"
@@ -70,6 +63,9 @@ const onScrollToBottom = () => {
         @totop="onScrollToTop"
         @tobottom="onScrollToBottom"
       >
+        <template #default="{source}">
+          <Item :source="source"></Item>
+        </template>
         <template #footer>
           <div class="loader"></div>
         </template>
@@ -78,7 +74,7 @@ const onScrollToBottom = () => {
   </div>
 </template>
 
-<style lang="less">
+<style lang="scss">
 .result {
   margin-bottom: 1em;
 }
