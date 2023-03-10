@@ -49,11 +49,12 @@ import {
   onMounted,
   onUnmounted,
   ref,
+  watch,
   withDefaults,
 } from "vue";
 import Virsual from "@virsual-scroller/core";
 import SlotWrap from "./SlotWrap.vue";
-import virtualListItem from "./virtual-list-item.vue";
+import virtualListItem from "./VirtualListItem.vue";
 import { Range, SLOT_TYPE, EVENT_TYPE } from "./types";
 
 type Direction = "vertical" | "horizontal";
@@ -105,7 +106,8 @@ const getUniqueIdFromDataSources = () => {
     typeof dataKey === "function" ? dataKey(dataSource) : dataSource[dataKey]
   );
 };
-const onRangeChanged = (newRange: any) => {
+const onRangeChanged = (newRange: Range) => {
+  console.log('==============', range)
   range.value = newRange;
 };
 const installVirtual = () => {
@@ -126,6 +128,17 @@ const installVirtual = () => {
   range.value = virtual.getRange();
 };
 
+/**
+ * watch
+ */
+watch(
+  () => props.dataSources.length,
+  () => {
+    virtual.updateParam('uniqueIds', getUniqueIdFromDataSources());
+    virtual.handleDataSourcesChange();
+  },
+);
+
 const visibleList = computed(() => {
   const listsData: Array<Record<string, any>> = [];
   for (let index = range.value!.start; index <= range.value!.end; index++) {
@@ -141,7 +154,7 @@ const visibleList = computed(() => {
         listsData.push({
           index,
           uniqueKey,
-          dataSource,
+          ...dataSource,
         });
       }
     }
@@ -218,6 +231,8 @@ const onScroll = (evt: Event) => {
   if (offset < 0 || offset + clientSize > scrollSize + 1 || !scrollSize) {
     return;
   }
+
+  console.log('scroll ing', offset)
 
   virtual.handleScroll(offset);
   emitEvent(offset, clientSize, scrollSize, evt);

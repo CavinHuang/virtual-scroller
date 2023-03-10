@@ -1,7 +1,7 @@
 var ee = Object.defineProperty;
 var te = (e, t, s) => t in e ? ee(e, t, { enumerable: !0, configurable: !0, writable: !0, value: s }) : e[t] = s;
 var S = (e, t, s) => (te(e, typeof t != "symbol" ? t + "" : t, s), s);
-import { ref as p, onMounted as V, computed as q, onUpdated as se, onUnmounted as $, onDeactivated as ne, isRef as ie, watch as W, nextTick as G, onActivated as J, unref as x, defineComponent as K, useSlots as ae, reactive as oe, openBlock as R, createElementBlock as k, createElementVNode as L, normalizeStyle as N, renderSlot as M, toDisplayString as le, createCommentVNode as X, mergeProps as re, onBeforeMount as ue, createVNode as Y, normalizeClass as A, Fragment as ce, renderList as de, createBlock as he, withCtx as fe, normalizeProps as ge, guardReactiveProps as pe } from "vue";
+import { ref as p, onMounted as N, computed as q, onUpdated as se, onUnmounted as $, onDeactivated as ne, isRef as ie, watch as X, nextTick as G, onActivated as J, unref as x, defineComponent as K, useSlots as ae, reactive as oe, openBlock as R, createElementBlock as k, createElementVNode as L, normalizeStyle as V, renderSlot as M, toDisplayString as le, createCommentVNode as Y, mergeProps as re, onBeforeMount as ue, createVNode as U, normalizeClass as A, Fragment as ce, renderList as de, createBlock as he, withCtx as fe, normalizeProps as ge, guardReactiveProps as pe } from "vue";
 const me = /scroll|auto|overlay/i, Q = window || void 0;
 function ve(e) {
   return e.tagName !== "HTML" && e.tagName !== "BODY" && e.nodeType === 1;
@@ -18,7 +18,7 @@ function Se(e, t = Q) {
 }
 function ye(e, t = Q) {
   const s = p();
-  return V(() => {
+  return N(() => {
     e.value && (s.value = Se(e.value, t));
   }), s;
 }
@@ -67,7 +67,7 @@ const Z = (e, t, s) => {
     const { event: f, uniqueKey: m, hasInitial: g } = e;
     s(f, m, u(), g);
   };
-  V(() => {
+  N(() => {
     typeof ResizeObserver < "u" && (n = new ResizeObserver(() => {
       c();
     }), t.value && n.observe(t.value));
@@ -79,7 +79,7 @@ const Z = (e, t, s) => {
 };
 function Re(e) {
   let t;
-  V(() => {
+  N(() => {
     e(), G(() => {
       t = !0;
     });
@@ -108,7 +108,7 @@ function De(e, t, s = {}) {
   };
   $(() => g(n)), ne(() => g(n)), Re(() => m(n));
   let z;
-  return ie(n) && (z = W(n, (r, o) => {
+  return ie(n) && (z = X(n, (r, o) => {
     g(o), m(r);
   })), () => {
     z == null || z(), g(n), c = !0;
@@ -120,7 +120,7 @@ const Oe = {
 }, ke = {
   key: 1,
   class: "loading"
-}, _e = /* @__PURE__ */ K({
+}, Pe = /* @__PURE__ */ K({
   __name: "PullRefresh",
   props: {
     disabled: { type: Boolean },
@@ -165,32 +165,32 @@ const Oe = {
         status: r.status,
         distance: l
       });
-    }, P = () => {
+    }, B = () => {
       const { status: l } = r;
       return l === "normal" ? "" : s[`${l}Text`] || u[l];
     }, w = () => {
       r.status = "success", setTimeout(() => {
         I(0);
       }, +s.successDuration);
-    }, _ = (l) => {
+    }, P = (l) => {
       f = xe(z.value) === 0, f && (r.duration = 0, o.start(l));
     }, O = (l) => {
-      D() && _(l);
-    }, B = (l) => {
+      D() && P(l);
+    }, b = (l) => {
       if (D()) {
-        f || _(l);
+        f || P(l);
         const { deltaY: v } = o;
         o.move(l), f && v.value >= 0 && o.isVertical() && (Ie(l), I(F(v.value)));
       }
     }, C = () => {
       f && o.deltaY.value && D() && (r.duration = +s.animationDuration, r.status === "loosing" ? (I(+s.headHeight, !0), t("update:modelValue", !0), G(() => t("refresh"))) : I(0));
     };
-    return W(
+    return X(
       () => s.modelValue,
       (l) => {
         r.duration = +s.animationDuration, l ? I(+s.headHeight, !0) : c.success || s.successText ? w() : I(0, !1);
       }
-    ), De("touchmove", B, {
+    ), De("touchmove", b, {
       target: g
     }), (l, v) => (R(), k("div", {
       ref_key: "root",
@@ -201,18 +201,18 @@ const Oe = {
         ref_key: "track",
         ref: g,
         class: "pull-refresh__track",
-        style: N(x(y)),
+        style: V(x(y)),
         "on:touchstartPassive": O,
         onTouchend: C,
         onTouchcancel: C
       }, [
         L("div", {
           class: "pull-refresh__head",
-          style: N(E())
+          style: V(E())
         }, [
           M(l.$slots, r.status, {}, () => [
-            a.includes(r.status) ? (R(), k("div", Oe, le(P()), 1)) : X("", !0),
-            r.status === "loading" ? (R(), k("div", ke)) : X("", !0)
+            a.includes(r.status) ? (R(), k("div", Oe, le(B()), 1)) : Y("", !0),
+            r.status === "loading" ? (R(), k("div", ke)) : Y("", !0)
           ])
         ], 4),
         M(l.$slots, "default")
@@ -220,7 +220,7 @@ const Oe = {
     ], 512));
   }
 });
-var U = 2, Me = class {
+var j = 2, Me = class {
   constructor(e, t) {
     S(this, "callUpdate");
     /**
@@ -303,7 +303,7 @@ var U = 2, Me = class {
    */
   handleDataSourcesChange() {
     let e = this.range.start;
-    this.isFront() ? e = e - U : this.isBehind() && (e = e + U), e = Math.max(e, 0), this.updateRange(this.range.start, this.getEndByStart(e));
+    this.isFront() ? e = e - j : this.isBehind() && (e = e + j), e = Math.max(e, 0), this.updateRange(this.range.start, this.getEndByStart(e));
   }
   /**
    * 单项大小变动
@@ -317,19 +317,21 @@ var U = 2, Me = class {
    * @returns 
    */
   handleScroll(e) {
-    this.direction = e < this.offset ? "FRONT" : "BEHIND", this.offset = e, this.param && (console.log(this.direction), this.direction === "FRONT" ? this.handleFront() : this.direction === "BEHIND" && this.handleBehind());
+    this.direction = e < this.offset ? "FRONT" : "BEHIND", this.offset = e, console.log(this.param), this.param && (console.log(this.direction), this.direction === "FRONT" ? this.handleFront() : this.direction === "BEHIND" && this.handleBehind());
   }
   // ----------- public method end -----------
   handleFront() {
+    var s;
     const e = this.getScrollOvers();
-    if (e > this.range.start)
+    if (console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", e, this.range, (s = this.param) == null ? void 0 : s.buffer), e > this.range.start)
       return;
     const t = Math.max(e - this.param.buffer, 0);
     this.checkRange(t, this.getEndByStart(t));
   }
   handleBehind() {
+    var t;
     const e = this.getScrollOvers();
-    e < this.range.start + this.param.buffer || this.checkRange(e, this.getEndByStart(e));
+    console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", e, this.range, (t = this.param) == null ? void 0 : t.buffer), !(e < this.range.start + this.param.buffer) && this.checkRange(e, this.getEndByStart(e));
   }
   // 根据当前滚动偏移返回传递
   getScrollOvers() {
@@ -392,7 +394,7 @@ var U = 2, Me = class {
     return this.isFixedType() ? this.fixedSizeValue : this.firstRangeAverageSize || this.param.estimateSize;
   }
 };
-const j = /* @__PURE__ */ K({
+const W = /* @__PURE__ */ K({
   __name: "SlotWrap",
   props: {
     event: null,
@@ -411,7 +413,7 @@ const j = /* @__PURE__ */ K({
     ]));
   }
 }), Ce = /* @__PURE__ */ K({
-  __name: "virtual-list-item",
+  __name: "VirtualListItem",
   props: {
     index: null,
     event: null,
@@ -453,8 +455,8 @@ const j = /* @__PURE__ */ K({
     ]));
   }
 });
-var H = /* @__PURE__ */ ((e) => (e.ITEM = "itemResize", e.SLOT = "slotResize", e))(H || {}), b = /* @__PURE__ */ ((e) => (e.HEADER = "thead", e.FOOTER = "tfoot", e))(b || {});
-const Be = /* @__PURE__ */ K({
+var H = /* @__PURE__ */ ((e) => (e.ITEM = "itemResize", e.SLOT = "slotResize", e))(H || {}), _ = /* @__PURE__ */ ((e) => (e.HEADER = "thead", e.FOOTER = "tfoot", e))(_ || {});
+const be = /* @__PURE__ */ K({
   __name: "VisualList",
   props: {
     dataKey: null,
@@ -483,7 +485,7 @@ const Be = /* @__PURE__ */ K({
         (h) => typeof i == "function" ? i(h) : h[i]
       );
     }, m = (i) => {
-      c.value = i;
+      console.log("==============", c), c.value = i;
     }, g = () => {
       a = new Me(
         {
@@ -498,7 +500,14 @@ const Be = /* @__PURE__ */ K({
         },
         m
       ), c.value = a.getRange();
-    }, z = q(() => {
+    };
+    X(
+      () => n.dataSources.length,
+      () => {
+        a.updateParam("uniqueIds", f()), a.handleDataSourcesChange();
+      }
+    );
+    const z = q(() => {
       const i = [];
       for (let d = c.value.start; d <= c.value.end; d++) {
         const h = n.dataSources[d];
@@ -507,7 +516,7 @@ const Be = /* @__PURE__ */ K({
           (typeof T == "string" || typeof T == "number") && i.push({
             index: d,
             uniqueKey: T,
-            dataSource: h
+            ...h
           });
         }
       }
@@ -520,24 +529,24 @@ const Be = /* @__PURE__ */ K({
       return n.pageMode ? document.documentElement[i] || document.body[i] : o.value ? Math.ceil(o.value[i]) : 0;
     }, I = (i, d, h, T) => {
       s("scroll", T, a.getRange()), a.isFront() && n.dataSources.length && i - n.topThreshold <= 0 ? s("totop") : a.isBehind() && i + d + n.bottomThreshold >= h && s("tobottom");
-    }, P = (i) => {
+    }, B = (i) => {
       const d = E(), h = D(), T = F();
-      d < 0 || d + h > T + 1 || !T || (a.handleScroll(d), I(d, h, T, i));
+      d < 0 || d + h > T + 1 || !T || (console.log("scroll ing", d), a.handleScroll(d), I(d, h, T, i));
     };
     ue(() => {
       g();
     }), J(() => {
       O(a.offset);
-    }), V(() => {
-      n.start ? _(n.start) : n.offset && O(n.offset), n.pageMode && (l(), document.addEventListener("scroll", P, {
+    }), N(() => {
+      n.start ? P(n.start) : n.offset && O(n.offset), n.pageMode && (l(), document.addEventListener("scroll", B, {
         passive: !1
       }));
     }), $(() => {
-      a.destroy(), n.pageMode && document.removeEventListener("scroll", P);
+      a.destroy(), n.pageMode && document.removeEventListener("scroll", B);
     });
     const w = (i, d, h) => {
-      i === b.HEADER ? a.updateParam("slotHeaderSize", d) : b.FOOTER, h && a.handleSlotSizeChange();
-    }, _ = (i) => {
+      i === _.HEADER ? a.updateParam("slotHeaderSize", d) : _.FOOTER, h && a.handleSlotSizeChange();
+    }, P = (i) => {
       if (i >= n.dataSources.length - 1)
         C();
       else {
@@ -546,9 +555,9 @@ const Be = /* @__PURE__ */ K({
       }
     }, O = (i) => {
       n.pageMode ? (document.body[y] = i, document.documentElement[y] = i) : o.value && (o.value[y] = i);
-    }, B = p(null), C = () => {
-      if (B.value) {
-        const i = B.value[u ? "offsetLeft" : "offsetTop"];
+    }, b = p(null), C = () => {
+      if (b.value) {
+        const i = b.value[u ? "offsetLeft" : "offsetTop"];
         O(i), setTimeout(() => {
           E() + D() < F() && C();
         }, 3);
@@ -567,23 +576,23 @@ const Be = /* @__PURE__ */ K({
       getScrollSize: F,
       getClientSize: D,
       scrollToOffset: O,
-      scrollToIndex: _
+      scrollToIndex: P
     }), (i, d) => (R(), k("div", {
       ref_key: "root",
       ref: o,
-      onScroll: P
+      onScroll: B
     }, [
       M(i.$slots, "header", {}, () => [
-        Y(j, {
+        U(W, {
           class: A(e.headClass),
           event: x(H).SLOT,
-          "unique-key": x(b).HEADER,
+          "unique-key": x(_).HEADER,
           onSlotResize: w
         }, null, 8, ["class", "event", "unique-key"])
       ]),
       L("div", {
         class: A(e.wrapClass),
-        style: N(e.wrapStyle)
+        style: V(e.wrapStyle)
       }, [
         (R(!0), k(ce, null, de(x(z), (h, T) => (R(), he(Ce, {
           index: h.index,
@@ -600,17 +609,17 @@ const Be = /* @__PURE__ */ K({
         }, 1032, ["index", "event", "unique-key", "source", "extra-props"]))), 256))
       ], 6),
       M(i.$slots, "footer", {}, () => [
-        Y(j, {
+        U(W, {
           class: A(e.footerClass),
           event: x(H).SLOT,
-          "unique-key": x(b).FOOTER,
+          "unique-key": x(_).FOOTER,
           onSlotResize: w
         }, null, 8, ["class", "event", "unique-key"])
       ]),
       L("div", {
         ref_key: "shepherd",
-        ref: B,
-        style: N({
+        ref: b,
+        style: V({
           width: u ? "0px" : "100%",
           height: u ? "100%" : "0px"
         })
@@ -619,6 +628,6 @@ const Be = /* @__PURE__ */ K({
   }
 });
 export {
-  _e as PullRefresh,
-  Be as VirsualList
+  Pe as PullRefresh,
+  be as VirsualList
 };

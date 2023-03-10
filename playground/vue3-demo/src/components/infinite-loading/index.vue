@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { VirsualList } from '@virsual-scroller/vue';
+import VirsualList from '@virsual-scroller/vue/src/VisualList.vue';
 
 import Item from './item.vue';
 import { genUniqueId, getSentences, random } from './utils';
@@ -63,8 +63,8 @@ const onScrollToBottom = () => {
         @totop="onScrollToTop"
         @tobottom="onScrollToBottom"
       >
-        <template #default="{source}">
-          <Item :source="source"></Item>
+        <template #default="{source, index}">
+          <Item :source="source" :index="index"></Item>
         </template>
         <template #footer>
           <div class="loader"></div>

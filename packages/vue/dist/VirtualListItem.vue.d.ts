@@ -75,8 +75,8 @@ declare const _sfc_main: DefineComponent<{
 }>> & {
     onItemResize?: ((...args: any[]) => any) | undefined;
 }, {
-    horizontal: boolean | undefined;
     extraProps: Record<string, any> | undefined;
+    horizontal: boolean | undefined;
     scopedSlots: Record<string, any> | undefined;
 }>;
 export default _sfc_main;

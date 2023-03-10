@@ -222,6 +222,8 @@ export default class Virtual {
       offset < this.offset ? DIRECTION_TYPE.FRONT : DIRECTION_TYPE.BEHIND;
     this.offset = offset;
 
+    console.log(this.param)
+    
     if (!this.param) {
       return;
     }
@@ -238,6 +240,7 @@ export default class Virtual {
 
   handleFront() {
     const overs = this.getScrollOvers();
+    console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
     // should not change range if start doesn't exceed overs
     if (overs > this.range!.start) {
       return;
@@ -250,7 +253,7 @@ export default class Virtual {
 
   handleBehind() {
     const overs = this.getScrollOvers();
-    // console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
+    console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
     // range should not change if scroll overs within buffer
     if (overs < this.range!.start + this.param!.buffer) {
       return;
