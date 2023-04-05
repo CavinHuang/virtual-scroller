@@ -3,8 +3,8 @@
  */
 
 const enum DIRECTION_TYPE {
-  FRONT = 'FRONT', // scroll up or left
-  BEHIND = 'BEHIND', // scroll down or right
+  FRONT = 'FRONT', // 往上
+  BEHIND = 'BEHIND', // 往下
 };
 
 const enum CALC_TYPE {
@@ -13,17 +13,19 @@ const enum CALC_TYPE {
   DYNAMIC = 'DYNAMIC',
 };
 
+// 溢出多少个
 const LEADING_BUFFER = 2;
 
-interface IParmas {
+export interface IParmas {
   // 虚拟列表在真实 dom 中继续呈现多少项
-  keeps: number
-  extraProps: Record<string, any>,
+  keeps?: number
+  extraProps?: Record<string, any>,
   // 每个项目的估计大小，如果它更接近平均大小，滚动条长度看起来更准确。建议分配自己计算的平均值。
-  estimateSize: number
-  slotHeaderSize: number
-  uniqueIds: Array<string | number>
-  buffer: number
+  estimateSize?: number
+  slotHeaderSize?: number
+  slotFooterSize?: number
+  uniqueIds?: Array<string | number>
+  buffer?: number
 }
 
 type CallUpdate = (rang: RangeItem) => void
@@ -44,7 +46,8 @@ export default class Virtual {
     keeps: 30,
     extraProps: {},
     estimateSize: 50,
-    slotHeaderSize: 10,
+    slotHeaderSize: 0,
+    slotFooterSize: 0,
     uniqueIds: [],
     buffer: 5
   };
@@ -75,6 +78,21 @@ export default class Virtual {
     this.param = Object.assign({}, this.param, param);
     this.callUpdate = callUpdate;
     this.uniqueIds = this.param.uniqueIds
+
+    // size data init
+    this.sizes = new Map()
+    this.firstRangeTotalSize = 0
+    this.firstRangeAverageSize = 0
+    this.lastCalcIndex = 0
+    this.fixedSizeValue = 0
+    this.calcType = CALC_TYPE.INIT
+
+    // scroll data init
+    this.offset = 0
+    this.direction = ''
+
+    // range data init
+    this.range = Object.create(null)
 
     if (param) {
       this.checkRange(0, param.keeps - 1);
@@ -119,25 +137,25 @@ export default class Virtual {
    */
   getOffset(start: number) {
     return (
-      (start < 1 ? 0 : this.getIndexOffset(start)) + this.param!.slotHeaderSize
+      (start < 1 ? 0 : this.getIndexOffset(start)) + (this.param?.slotHeaderSize || 0)
     );
   }
 
+  /**
+   * id变化时，找出需要删除的项
+   * @param key 
+   * @param value 
+   */
   updateParam(key: keyof IParmas, value: any) {
     if (this.param && key in this.param) {
-      // if uniqueIds change, find out deleted id and remove from size map
-      // TODO
-      // @ts-ignore
       if (key === 'uniqueIds') {
         this.sizes.forEach((v, key) => {
           if (!value.includes(key)) {
             this.sizes.delete(key);
           }
         });
-        this.uniqueIds = value
+        this.setUniqueIds(value)
       }
-      // TODO
-      // @ts-ignore
       this.param[key] = value;
     }
   }
@@ -147,12 +165,11 @@ export default class Virtual {
    * @param id 
    * @param size 
    */
-  saveSize(id: number, size: number) {
+  saveSize(id: number | string, size: number) {
     this.sizes.set(id, size);
 
-    // we assume size type is fixed at the beginning and remember first size value
-    // if there is no size value different from this at next comming saving
-    // we think it's a fixed size list, otherwise is dynamic size list
+    // 假设大小在一开始是固定的，并记住第一个大小值
+    // 如果在下一次保存时没有与此不同的尺寸值 we think it's a fixed size list, otherwise is dynamic size list
     if (this.calcType === CALC_TYPE.INIT) {
       this.fixedSizeValue = size;
       this.calcType = CALC_TYPE.FIXED;
@@ -161,18 +178,18 @@ export default class Virtual {
       this.fixedSizeValue !== size
     ) {
       this.calcType = CALC_TYPE.DYNAMIC;
-      // it's no use at all
+      // 删除无用的属性
       delete this.fixedSizeValue;
     }
 
-    // calculate the average size only in the first range
+    // 仅在第第一次计算平均大小
     if (
       this.calcType !== CALC_TYPE.FIXED &&
       typeof this.firstRangeTotalSize !== 'undefined'
     ) {
       if (
         this.sizes.size <
-        Math.min(this.param!.keeps, this!.uniqueIds.length)
+        Math.min(this.param!.keeps, this.uniqueIds.length)
       ) {
         this.firstRangeTotalSize = [...this.sizes.values()].reduce(
           (acc, val) => acc + val,
@@ -182,7 +199,7 @@ export default class Virtual {
           this.firstRangeTotalSize! / this.sizes.size,
         );
       } else {
-        // it's done using
+        // 删除无用属性
         delete this.firstRangeTotalSize;
       }
     }
@@ -241,7 +258,7 @@ export default class Virtual {
   handleFront() {
     const overs = this.getScrollOvers();
     console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
-    // should not change range if start doesn't exceed overs
+    // 如果不超出范围
     if (overs > this.range!.start) {
       return;
     }
@@ -254,7 +271,7 @@ export default class Virtual {
   handleBehind() {
     const overs = this.getScrollOvers();
     console.log("🚀 ~ file: index.ts:225 ~ Virtual ~ handleBehind ~ overs:", overs, this.range, this.param?.buffer)
-    // range should not change if scroll overs within buffer
+    // 向上移动一段缓冲长度
     if (overs < this.range!.start + this.param!.buffer) {
       return;
     }
@@ -264,13 +281,13 @@ export default class Virtual {
 
   // 根据当前滚动偏移返回传递
   getScrollOvers() {
-    // if slot header exist, we need subtract its size
+    // 如果header slot存在，我们需要减去它的大小
     const offset = this.offset - this.param!.slotHeaderSize;
     if (offset <= 0) {
       return 0;
     }
 
-    // if is fixed type, that can be easily
+    // 如果是固定高度类型
     if (this.isFixedType()) {
       return Math.floor(offset / this.fixedSizeValue!);
     }
@@ -278,7 +295,7 @@ export default class Virtual {
     let low = 0;
     let middle = 0;
     let middleOffset = 0;
-    let high = this!.uniqueIds.length;
+    let high = this.uniqueIds.length || 0;
 
     while (low <= high) {
       // this.__bsearchCalls++
@@ -308,20 +325,20 @@ export default class Virtual {
     let indexSize = 0;
     for (let index = 0; index < givenIndex; index++) {
       // this.__getIndexOffsetCalls++
-      indexSize = this.sizes.get(this!.uniqueIds[index]);
+      indexSize = this.sizes.get(this.uniqueIds[index]);
       offset =
         offset +
         (typeof indexSize === 'number' ? indexSize : this.getEstimateSize()!);
     }
 
-    // remember last calculate index
+    //记住最后的index
     this.lastCalcIndex = Math.max(this.lastCalcIndex, givenIndex - 1);
     this.lastCalcIndex = Math.min(this.lastCalcIndex, this.getLastIndex());
 
     return offset;
   }
 
-  // 是不是fixed模式
+  // 是不是固定高模式
   isFixedType() {
     return this.calcType === CALC_TYPE.FIXED;
   }
@@ -338,7 +355,7 @@ export default class Virtual {
 
     console.log(this.param, keeps, total, end - start < keeps - 1)
 
-    // datas less than keeps, render all
+    // 少于需要渲染的个数
     if (total <= keeps) {
       start = 0;
       end = this.getLastIndex();
@@ -350,7 +367,6 @@ export default class Virtual {
     console.log(this.range, start)
 
     if (this.range!.start !== start) {
-      console.log('==+++++++++++++=================')
       this.updateRange(start, end);
     }
   }
@@ -392,11 +408,11 @@ export default class Virtual {
       return (lastIndex - end) * this.fixedSizeValue!;
     }
 
-    // if it's all calculated, return the exactly offset
+    // 如果全部计算完毕，则返回精确的偏移量
     if (this.lastCalcIndex === lastIndex) {
       return this.getIndexOffset(lastIndex) - this.getIndexOffset(end);
     } else {
-      // if not, use a estimated value
+      // 没有，则使用估计值
       return (lastIndex - end) * this.getEstimateSize()!;
     }
   }

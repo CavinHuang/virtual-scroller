@@ -2,11 +2,11 @@
   "name": "@virsual-scroller/core",
   "version": "1.0.0",
   "description": "",
-  "main": "./libs/index.js",
-  "module": "./libs/index.js",
-  "types": "./libs/index.d.ts",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
   "exports": {
-    "default": "./libs/index.mjs"
+    "default": "./index.ts"
   },
   "scripts": {
     "build": "tsup",
