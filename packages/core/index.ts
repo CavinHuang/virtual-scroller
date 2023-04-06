@@ -1,5 +1,5 @@
 /**
- * virtual list core calculating center
+ * 虚拟列表核心类
  */
 
 const enum DIRECTION_TYPE {

@@ -21,7 +21,7 @@ enum EVENT_TYPE {
 }
 
 enum SLOT_TYPE {
-  HEADER = "thead", // string value also use for aria role attribute
+  HEADER = "thead", // slot的类型
   FOOTER = "tfoot",
 }
 
@@ -34,7 +34,9 @@ interface Range {
 
 const props = defineProps({
   dataKey: {
-    type: [String, Function],
+    type: [String, Function] as PropType<
+      string | ((dataSource: unknown) => string)
+    >,
     required: true,
   },
   dataSources: {
@@ -179,7 +181,7 @@ watch(
 /**
  * methods
  */
-// get item size by id
+// 根据id获取size
 const getSize = (id: number | string) => {
   return virtual.sizes.get(id);
 };
@@ -188,28 +190,26 @@ const getOffset = () => {
     return (
       document.documentElement[directionKey] || document.body[directionKey]
     );
-  } else {
-    return root.value ? Math.ceil(root.value[directionKey]) : 0;
   }
+  return root.value ? Math.ceil(root.value[directionKey]) : 0;
 };
-// return client viewport size
+// 返回视口的大小
 const getClientSize = () => {
   const key = isHorizontal ? "clientWidth" : "clientHeight";
   if (props.pageMode) {
     return document.documentElement[key] || document.body[key];
-  } else {
-    return root.value ? Math.ceil(root.value[key]) : 0;
   }
+  return root.value ? Math.ceil(root.value[key]) : 0;
 };
-// return all scroll size
+// 获取所有项的大小
 const getScrollSize = () => {
   const key = isHorizontal ? "scrollWidth" : "scrollHeight";
   if (props.pageMode) {
     return document.documentElement[key] || document.body[key];
-  } else {
-    return root.value ? Math.ceil(root.value[key]) : 0;
   }
+  return root.value ? Math.ceil(root.value[key]) : 0;
 };
+//事件响应
 const emitEvent = (
   offset: number,
   clientSize: number,
@@ -231,12 +231,14 @@ const emitEvent = (
     emit("tobottom");
   }
 };
+
+// 滚动事件
 const onScroll = (evt: Event) => {
   const offset = getOffset();
   const clientSize = getClientSize();
   const scrollSize = getScrollSize();
 
-  // iOS scroll-spring-back behavior will make direction mistake
+  // 修复触顶无线循环的问题
   if (offset < 0 || offset + clientSize > scrollSize + 1 || !scrollSize) {
     return;
   }
@@ -244,16 +246,19 @@ const onScroll = (evt: Event) => {
   virtual.handleScroll(offset);
   emitEvent(offset, clientSize, scrollSize, evt);
 };
-
+// 获取所有的id
 const getUniqueIdFromDataSources = () => {
   const { dataKey, dataSources = [] } = props;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return dataSources.map((dataSource: any) =>
     typeof dataKey === "function" ? dataKey(dataSource) : dataSource[dataKey]
   );
 };
-const onRangeChanged = (newRange: any) => {
+// 指针变动
+const onRangeChanged = (newRange: Range) => {
   range.value = newRange;
 };
+// 初始化虚拟类
 const installVirtual = () => {
   virtual = new Virtual(
     {
@@ -267,12 +272,12 @@ const installVirtual = () => {
     onRangeChanged
   );
 
-  // sync initial range
+  // 同步指针
   range.value = virtual.getRange();
 };
-// set current scroll position to a expectant index
+// 滚动到具体的条数
 const scrollToIndex = (index: number) => {
-  // scroll to bottom
+  // 大于当前的总数 直接滚动到底部
   if (index >= props.dataSources.length - 1) {
     scrollToBottom();
   } else {
@@ -280,7 +285,7 @@ const scrollToIndex = (index: number) => {
     scrollToOffset(offset);
   }
 };
-// set current scroll position to a expectant offset
+// 滚动到具体的位置 scrollTop
 const scrollToOffset = (offset: number) => {
   if (props.pageMode) {
     document.body[directionKey] = offset;
@@ -291,9 +296,13 @@ const scrollToOffset = (offset: number) => {
     }
   }
 };
+
+// 取巧渲染子级
 const getRenderSlots = () => {
   const slots = [];
-  const { start, end } = range.value!;
+  const _range = range.value;
+  const start = _range?.start || 0;
+  const end = _range?.end || 0;
   const {
     dataSources,
     dataKey,
@@ -307,7 +316,8 @@ const getRenderSlots = () => {
   for (let index = start; index <= end; index++) {
     const dataSource = dataSources[index];
     if (dataSource) {
-      const uniqueKey =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const uniqueKey: string =
         typeof dataKey === "function"
           ? dataKey(dataSource)
           : (dataSource as any)[dataKey];
@@ -331,22 +341,22 @@ const getRenderSlots = () => {
           })
         );
       } else {
-        console.warn(`Cannot get the data-key '${dataKey}' from data-sources.`);
+        console.warn(`没有这样的key '${dataKey}'`);
       }
     } else {
-      console.warn(`Cannot get the index '${index}' from data-sources.`);
+      console.warn(`没有这样的索引 '${index}'`);
     }
   }
   return slots;
 };
 
-// event called when each item mounted or size changed
+// 每个item挂载完或者大小变动时触发的事件
 const onItemResized = (id: string, size: number) => {
   virtual.saveSize(id, size);
   emit("resized", id, size);
 };
 
-// event called when slot mounted or size changed
+// 头部和顶部的slot挂载和大小变动时触发的事件
 const onSlotResized = (type: SLOT_TYPE, size: number, hasInit: boolean) => {
   if (type === SLOT_TYPE.HEADER) {
     virtual.updateParam("slotHeaderSize", size);
@@ -359,62 +369,60 @@ const onSlotResized = (type: SLOT_TYPE, size: number, hasInit: boolean) => {
   }
 };
 
-// set current scroll position to bottom
+// 滚动到底部
 const scrollToBottom = () => {
   if (shepherd.value) {
     const offset = shepherd.value[isHorizontal ? "offsetLeft" : "offsetTop"];
     scrollToOffset(offset);
 
-    // check if it's really scrolled to the bottom
-    // maybe list doesn't render and calculate to last range
-    // so we need retry in next event loop until it really at bottom
+    // 检查是否真的已经到底了
+    // 列表可能并没有到底部，此时借助事件循环重试，直到它真的到了底部。
     setTimeout(() => {
-      if (getOffset() + getClientSize() < getScrollSize()) {
+      if (getOffset() + getClientSize() + 1 < getScrollSize()) {
         scrollToBottom();
       }
     }, 3);
   }
 };
 
-// when using page mode we need update slot header size manually
-// taking root offset relative to the browser as slot header size
+// 页面滚动模式，需要手动更新插槽的大小，并且使用浏览器当前的偏移量计算
 const updatePageModeFront = () => {
   if (root.value) {
     const rect = root.value.getBoundingClientRect();
     const { defaultView } = root.value.ownerDocument;
     const offsetFront = isHorizontal
-      ? rect.left + defaultView!.pageXOffset
-      : rect.top + defaultView!.pageYOffset;
+      ? rect.left + (defaultView?.pageXOffset || 0)
+      : rect.top + (defaultView?.pageYOffset || 0);
     virtual.updateParam("slotHeaderSize", offsetFront);
   }
 };
 
-// get the total number of stored (rendered) items
+// 获取渲染的高度
 const getSizes = () => {
   return virtual.sizes.size;
 };
 
 /**
- * life cycles
+ * 初始化
  */
 onBeforeMount(() => {
   installVirtual();
 });
 
-// set back offset when awake from keep-alive
+// 处理keepalive
 onActivated(() => {
   scrollToOffset(virtual.offset);
 });
 
 onMounted(() => {
-  // set position
+  // 设置开始
   if (props.start) {
     scrollToIndex(props.start);
   } else if (props.offset) {
     scrollToOffset(props.offset);
   }
 
-  // in page mode we bind scroll event to document
+  // 页面滚动模式绑定事件
   if (props.pageMode) {
     updatePageModeFront();
     document.addEventListener("scroll", onScroll, {
@@ -423,6 +431,7 @@ onMounted(() => {
   }
 });
 
+// 卸载
 onUnmounted(() => {
   virtual.destroy();
   if (props.pageMode) {
@@ -430,11 +439,13 @@ onUnmounted(() => {
   }
 });
 
+// 渲染上线的偏移高度 可使用定位
 const paddingStyle = computed(() => ({
   padding: isHorizontal
     ? `0px ${range.value?.padBehind || 0}px 0px ${range.value?.padFront || 0}px`
     : `${range.value?.padFront || 0}px 0px ${range.value?.padBehind || 0}px`,
 }));
+// style
 const wrapperStyle = computed(() =>
   props.wrapStyle
     ? Object.assign({}, props.wrapStyle, paddingStyle.value)
